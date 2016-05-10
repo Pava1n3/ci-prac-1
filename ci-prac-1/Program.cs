@@ -1,5 +1,6 @@
 ﻿﻿using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ci_prac_1
@@ -33,7 +34,7 @@ namespace ci_prac_1
             Console.WriteLine();
             for (y = 0; y < length; y++)
             {
-                for (int i = 0; i < length; i++)
+                for (int x = 0; x < length; x++)
                     Console.Write(sudoku[x, y].ToString() + " ");
                 Console.WriteLine();
             }
