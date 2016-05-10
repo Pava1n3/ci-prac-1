@@ -1,5 +1,6 @@
-﻿using System.Collections;
-using System;
+﻿﻿using System;
+using System.IO;
+using System.Collections.Generic;
 
 namespace ci_prac_1
 {
@@ -10,20 +11,84 @@ namespace ci_prac_1
 
         static void Main(string[] args)
         {
-            //sudoStack.Push(startdoku);
+            StreamReader stream = File.OpenText(args[0]);
+            string line = stream.ReadLine();
+            string[] lineChars = line.Split(' ');
+            int length = lineChars.Length;
 
-            Console.WriteLine("0 / 3 " + 0 / 3);
-            Console.WriteLine("1 / 3 " + 1 / 3);
-            Console.WriteLine("2 / 3 " + 2 / 3);
-            Console.WriteLine("3 / 3 " + 3 / 3);
-            Console.WriteLine("4 / 3 " + 4 / 3);
-            Console.WriteLine("5 / 3 " + 5 / 3);
-            Console.WriteLine("6 / 3 " + 6 / 3);
-            Console.WriteLine("7 / 3 " + 7 / 3);
-            Console.WriteLine("8 / 3 " + 8 / 3);
+            int[,] sudoku = new int[length, length];
+            for (int x = 0; x < length; x++)
+                sudoku[x, 0] = int.Parse(lineChars[x]);
+            int y = 1;
 
+            while (!stream.EndOfStream)
+            {
+                line = stream.ReadLine();
+                lineChars = line.Split(' ');
+                for (int x = 0; x < length; x++)
+                    sudoku[x, y] = int.Parse(lineChars[x]);
+                y++;
+            }
 
-            Console.ReadLine();
+            Console.WriteLine();
+            for (y = 0; y < length; y++)
+            {
+                for (int i = 0; i < length; i++)
+                    Console.Write(sudoku[x, y].ToString() + " ");
+                Console.WriteLine();
+            }
+            Console.ReadKey();
+        }
+
+        static Sudoku NextSuccessor(Sudoku sudoku)
+        {
+            // Loop through all of the tiles in the field
+            for (int y = 0; y < sudoku.Field.GetLength(0); y++)
+                for (int x = 0; x < sudoku.Field.GetLength(0); x++)
+                    // If the tile is empty
+                    if (sudoku.Field[x, y] == 0)
+                    {
+                        // Get the numbers that can validly be put in the tile
+                        int[] validNumbers = GetValidNumbers(sudoku.Field, x, y);
+
+                        for (int i = 0; i < validNumbers.Length; i++)
+                            // Check if we have already expanded this successor
+                            if (!sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1])
+                            {
+                                Sudoku successor = new Sudoku(sudoku.Field);
+                                successor.Field[x, y] = validNumbers[i];
+                                sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1] = true;
+                                return successor;
+                            }
+                    }
+
+            return null;
+        }
+
+        static int[] GetValidNumbers(int[,] sudoku, int x, int y)
+        {
+            int[] invalid = new int[sudoku.GetLength(0) + 1];
+            for (int x1 = 0; x1 < sudoku.GetLength(0); x1++)
+                invalid[sudoku[x1, y]]++;
+
+            for (int y1 = 0; y1 < sudoku.GetLength(0); y1++)
+                invalid[sudoku[x, y1]]++;
+
+            // x2, y2 = index of square
+            int root = (int)Math.Sqrt(sudoku.GetLength(0));
+            int x2 = x - x % root;
+            int y2 = y / root;
+
+            for (int y3 = y2; y3 < y2 + root; y3++)
+                for (int x3 = x2; x3 < x2 + root; x3++)
+                    invalid[sudoku[x3, y3]]++;
+
+            List<int> valid = new List<int>();
+            for (int i = 0; i < invalid.Length; i++)
+                if (invalid[i] == 0)
+                    valid.Add(i);
+
+            return valid.ToArray();
         }
 
         /*
