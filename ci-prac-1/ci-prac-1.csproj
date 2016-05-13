@@ -50,6 +50,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ci-prac-1-reader.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="sudoku_16x16.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
