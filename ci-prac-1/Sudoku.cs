@@ -45,7 +45,7 @@ namespace ci_prac_1
                 for (int x = 0; x < Program.sudoLength; x++)
                 {
                     int value = this.Field[x, y];
-                    sudoString += (value == 0 ? "." : value.ToString()) + " ";
+                    sudoString += value + " ";
                 }
                 sudoString += Environment.NewLine;
             }
