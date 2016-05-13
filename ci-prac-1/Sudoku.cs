@@ -24,6 +24,7 @@ namespace ci_prac_1
         
         public int[,] Field;
         public Number[,][] ExpandedSuccessors;
+
         public bool IsGoal
         {
             get
@@ -42,7 +43,10 @@ namespace ci_prac_1
             for (int y = 0; y < Program.sudoLength; y++)
             {
                 for (int x = 0; x < Program.sudoLength; x++)
-                    sudoString += this.Field[x, y] + " ";
+                {
+                    int value = this.Field[x, y];
+                    sudoString += (value == 0 ? "." : value.ToString()) + " ";
+                }
                 sudoString += Environment.NewLine;
             }
             return sudoString;

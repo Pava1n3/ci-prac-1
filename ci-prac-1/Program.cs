@@ -10,21 +10,21 @@ namespace ci_prac_1
         public static int sudoLength, sudoSquareLength;
         static void Main(string[] args)
         {
-            //FileStream ostrm;
-            //StreamWriter writer;
-            //TextWriter oldOut = //Console.Out;
-            //try
-            //{
-            //    ostrm = new FileStream("./Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
-            //    writer = new StreamWriter(ostrm);
-            //}
-            //catch (Exception e)
-            //{
-            //    //Console.WriteLine("Cannot open Redirect.txt for writing");
-            //    //Console.WriteLine(e.Message);
-            //    return;
-            //}
-            ////Console.SetOut(writer);
+            FileStream ostrm;
+            StreamWriter writer;
+            TextWriter oldOut = Console.Out;
+            try
+            {
+                ostrm = new FileStream("./Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                writer = new StreamWriter(ostrm);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Cannot open Redirect.txt for writing");
+                Console.WriteLine(e.Message);
+                return;
+            }
+            Console.SetOut(writer);
 
             StreamReader stream = File.OpenText(args[0]);
             string line = stream.ReadLine();
@@ -36,8 +36,6 @@ namespace ci_prac_1
             for (int x = 0; x < sudoLength; x++)
                 field[x, 0] = int.Parse(lineChars[x]);
             int y = 1;
-
-            //Console.WriteLine("Array is a " + field.GetType().IsClass);
 
             while (!stream.EndOfStream)
             {
@@ -59,7 +57,7 @@ namespace ci_prac_1
             Stack sudoStack = new Stack();
             sudoStack.Push(new Sudoku(field));
             Sudoku goal = BackTrack(sudoStack);
-            //Console.WriteLine(sudoStack.Count + " items on the stack");
+            Console.WriteLine(sudoStack.Count + " items on the stack");
             Console.WriteLine();
             Console.WriteLine(goal is Sudoku ? "Goal found!" : "No goal found");
             Console.WriteLine(goal);
@@ -77,22 +75,32 @@ namespace ci_prac_1
                         if (sudoku.ExpandedSuccessors[x, y] == null)
                         {
                             //int[] invalidNumbers = GetInvalidNumbers(sudoku.Field, x, y);
-                            sudoku.ExpandedSuccessors[x, y] = new Number[sudoLength];
+                            //sudoku.ExpandedSuccessors[x, y] = new Number[sudoLength];
                             //for (int i = 1; i <= sudoLength; i++)
                             //{
-                                sudoku.ExpandedSuccessors[x, y] = GetInvalidNumbers(sudoku.Field, x, y);//invalidNumbers[i] == 0 ? Number.Valid : Number.Invalid;
                             //}
+                            sudoku.ExpandedSuccessors[x, y] = GetInvalidNumbers(sudoku.Field, x, y);//invalidNumbers[i] == 0 ? Number.Valid : Number.Invalid;
                         }
 
+                        int amountOfInvalid = 0;
                         for (int i = 1; i <= sudoLength; i++)
+                        {
+                            Number number = sudoku.ExpandedSuccessors[x, y][i];
                             // Check if we have already expanded this successor
-                            if (sudoku.ExpandedSuccessors[x, y][i] == Number.Valid)
+                            if (number == Number.Valid)
                             {
                                 sudoku.ExpandedSuccessors[x, y][i] = Number.Checked;
                                 Sudoku successor = new Sudoku((int[,])sudoku.Field.Clone());
                                 successor.Field[x, y] = i;
                                 return successor;
                             }
+                            else if (number == Number.Invalid)
+                            {
+                                amountOfInvalid++;
+                                if (amountOfInvalid == sudoLength)
+                                    return null;
+                            }
+                        }
 
                         #region poep
                         //// Get the numbers that can validly be put in the tile
@@ -175,41 +183,41 @@ namespace ci_prac_1
 
         static Sudoku BackTrack(Stack sudoStack)
         {
-            //Console.WriteLine("Backtracking called");
+            Console.WriteLine("Backtracking called");
             if (sudoStack.Count == 0)
             {
-                //Console.WriteLine("Stack empty");
+                Console.WriteLine("Stack empty");
                 return null;
             }
             else
             {
-                //Console.WriteLine("Stack not empty");
+                Console.WriteLine("Stack not empty");
                 Sudoku t = (Sudoku)sudoStack.Peek();
-                //Console.WriteLine(t);
+                Console.WriteLine(t);
                 if (t.IsGoal)
                 {
-                    //Console.WriteLine("Sudoku is goal");
+                    Console.WriteLine("Sudoku is goal");
                     return t;
                 }
                 else
                 {
-                    //Console.WriteLine("Sudoku is not goal");
+                    Console.WriteLine("Sudoku is not goal");
                     while (true) //has-successors(t)
                     {
                         Sudoku s = NextSuccessor(t);
                         if (s == null)
                         {
-                            //Console.WriteLine("No successor found");
+                            Console.WriteLine("No successor found");
                             break;
                         }
-                        //Console.WriteLine("Successor found");
+                        Console.WriteLine("Successor found");
                         sudoStack.Push(s);
                         Sudoku goal = BackTrack(sudoStack);
                         if (goal != null)
                             return goal;
                     }
-                    ////Console.WriteLine(t);
-                    //Console.WriteLine("No goal under current sudoku");
+                    //Console.WriteLine(t);
+                    Console.WriteLine("No goal under current sudoku");
                     sudoStack.Pop();
                     return null;
                 }
