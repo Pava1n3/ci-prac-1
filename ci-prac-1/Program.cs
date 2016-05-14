@@ -15,6 +15,7 @@ namespace ci_prac_1
             TextWriter oldOut = Console.Out;
             try
             {
+                File.Delete("./Redirect.txt");
                 ostrm = new FileStream("./Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
                 writer = new StreamWriter(ostrm);
             }
