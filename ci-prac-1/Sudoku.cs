@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ci_prac_1
 {
+    public enum Number { Valid, Invalid, Checked };
     public class Sudoku
     {
         // Whole sudoku = Field
@@ -15,13 +16,40 @@ namespace ci_prac_1
         public Sudoku(int[,] sudoku)
         {
             this.Field = sudoku;
-            this.ExpandedSuccessors = new bool[sudoku.GetLength(0), sudoku.GetLength(0)][];
-            for (int y = 0; y < sudoku.GetLength(0); y++)
-                for (int x = 0; x < sudoku.GetLength(0); x++)
-                    this.ExpandedSuccessors[x, y] = new bool[sudoku.GetLength(0)];
+            this.ExpandedSuccessors = new Number[Program.sudoLength, Program.sudoLength][];
+            //for (int y = 0; y < sudoku.GetLength(0); y++)
+            //    for (int x = 0; x < sudoku.GetLength(0); x++)
+            //        this.ExpandedSuccessors[x, y] = new Number[sudoku.GetLength(0)];
+        }
+        
+        public int[,] Field;
+        public Number[,][] ExpandedSuccessors;
+
+        public bool IsGoal
+        {
+            get
+            {
+                for (int y = 0; y < Program.sudoLength; y++)
+                    for (int x = 0; x < Program.sudoLength; x++)
+                        if (this.Field[x, y] == 0)
+                            return false;
+                return true;
+            }
         }
 
-        public int[,] Field;
-        public bool[,][] ExpandedSuccessors;
+        public override string ToString()
+        {
+            string sudoString = "";
+            for (int y = 0; y < Program.sudoLength; y++)
+            {
+                for (int x = 0; x < Program.sudoLength; x++)
+                {
+                    int value = this.Field[x, y];
+                    sudoString += value + " ";
+                }
+                sudoString += Environment.NewLine;
+            }
+            return sudoString;
+        }
     }
 }
