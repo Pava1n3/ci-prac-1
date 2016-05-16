@@ -57,7 +57,7 @@ namespace ci_prac_1
                             if (!sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1])
                             {
                                 Sudoku successor = new Sudoku(sudoku.Field);
-                                successor.Field[x, y] = validNumbers[i];
+                                successor.Field[x, y] = validNumbers[i];    //change the successor with the chosen number
                                 sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1] = true;
                                 return successor;
                             }
@@ -70,7 +70,7 @@ namespace ci_prac_1
         {
             int[] invalid = new int[sudoku.GetLength(0) + 1];
             for (int x1 = 0; x1 < sudoku.GetLength(0); x1++)
-                invalid[sudoku[x1, y]]++;
+                invalid[sudoku[x1, y]]++;   //if a number's already used in a row or n * n square, we add + 1 to the invalid array, at the index of that number
 
             for (int y1 = 0; y1 < sudoku.GetLength(0); y1++)
                 invalid[sudoku[x, y1]]++;
