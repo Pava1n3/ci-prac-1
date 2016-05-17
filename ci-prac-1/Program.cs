@@ -95,6 +95,7 @@ namespace ci_prac_1
                                 //sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1] = true;
                                 sudoku.ExpandedSuccessors[x, y][i] = Number.Checked;
                                 Sudoku successor = new Sudoku((int[,])sudoku.Field.Clone());
+                                successor.ExpandedSuccessors = (Number[,][])sudoku.ExpandedSuccessors.Clone();
                                 successor.Field[x, y] = i;
 
                                 return successor;
