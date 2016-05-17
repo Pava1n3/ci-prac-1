@@ -17,9 +17,6 @@ namespace ci_prac_1
         {
             this.Field = sudoku;
             this.ExpandedSuccessors = new Number[Program.sudoLength, Program.sudoLength][];
-            //for (int y = 0; y < sudoku.GetLength(0); y++)
-            //    for (int x = 0; x < sudoku.GetLength(0); x++)
-            //        this.ExpandedSuccessors[x, y] = new Number[sudoku.GetLength(0)];
         }
         
         public int[,] Field;
