@@ -14,15 +14,23 @@ namespace ci_prac_1
         static void Main(string[] args)
         {
             // Read a text file with a sudoku puzzle
-            StreamReader stream;
+            string fileName;
             if (args.Length > 0)
             {
-                stream = File.OpenText(args[0]);
+                fileName = args[0];
                 if (args.Length > 1 && args[1] == "0")
                     useImprovedSuccessorMethod = false;
             }
             else
-                stream = File.OpenText("sudoku_9x9.txt");
+                fileName = "sudoku_9x9.txt";
+
+            Console.WriteLine("Opening file " + fileName);
+            StreamReader stream = File.OpenText(fileName);
+
+            if (useImprovedSuccessorMethod)
+                Console.WriteLine("Using improved backtracking algorithm");
+            else
+                Console.WriteLine("Using standard backtracking algorithm");
 
             // Read the first line of the file to get how large the sudoku is
             string line = stream.ReadLine();

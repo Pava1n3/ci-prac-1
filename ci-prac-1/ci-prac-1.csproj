@@ -56,6 +56,9 @@
     <Content Include="sudoku_16x16.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="sudoku_16x16_2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="sudoku_25x25.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
