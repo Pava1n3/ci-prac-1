@@ -250,4 +250,7 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+ci-prac-1/Redirect_9x9_3.txt
+*.csproj
 ci-prac-1/ci-prac-1.sln

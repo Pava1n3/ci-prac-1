@@ -10,29 +10,32 @@ namespace ci_prac_1
         public static int sudoLength, sudoSquareLength;
         static void Main(string[] args)
         {
-            FileStream ostrm;
-            StreamWriter writer;
-            TextWriter oldOut = Console.Out;
-            try
-            {
-                File.Delete("./Redirect.txt");
-                ostrm = new FileStream("./Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
-                writer = new StreamWriter(ostrm);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Cannot open Redirect.txt for writing");
-                Console.WriteLine(e.Message);
-                return;
-            }
-            Console.SetOut(writer);
+            // Let the Console output to a file
+            //FileStream ostrm;
+            //StreamWriter writer;
+            //TextWriter oldOut = Console.Out;
+            //try
+            //{
+            //    File.Delete("./Redirect.txt");
+            //    ostrm = new FileStream("./Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
+            //    writer = new StreamWriter(ostrm);
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("Cannot open Redirect.txt for writing");
+            //    Console.WriteLine(e.Message);
+            //    return;
+            //}
+            //Console.SetOut(writer);
 
+            // Read a text file with a sudoku puzzle
             StreamReader stream = File.OpenText(args[0]);
             string line = stream.ReadLine();
             string[] lineChars = line.Split(' ');
             sudoLength = lineChars.Length;
             sudoSquareLength = (int)Math.Sqrt(sudoLength);
 
+            // Put the sudoku text in an array
             int[,] field = new int[sudoLength, sudoLength];
             for (int x = 0; x < sudoLength; x++)
                 field[x, 0] = int.Parse(lineChars[x]);
@@ -46,8 +49,8 @@ namespace ci_prac_1
                     field[x, y] = int.Parse(lineChars[x]);
                 y++;
             }
-
-            //Console.WriteLine();
+            
+            // Print the sudoku
             for (y = 0; y < sudoLength; y++)
             {
                 for (int x = 0; x < sudoLength; x++)
@@ -55,13 +58,19 @@ namespace ci_prac_1
                 Console.WriteLine();
             }
 
+            // Execute backtrack algorithm and find a goal
+            TimeSpan startTime = DateTime.Now.TimeOfDay;
             Stack sudoStack = new Stack();
             sudoStack.Push(new Sudoku(field));
             Sudoku goal = BackTrack(sudoStack);
+            TimeSpan endTime = DateTime.Now.TimeOfDay;
+
             Console.WriteLine(sudoStack.Count + " items on the stack");
             Console.WriteLine();
             Console.WriteLine(goal is Sudoku ? "Goal found!" : "No goal found");
             Console.WriteLine(goal);
+            Console.WriteLine(endTime - startTime);
+            //ostrm.Close();
             Console.ReadKey();
         }
 
@@ -73,87 +82,106 @@ namespace ci_prac_1
                     // If the tile is empty
                     if (sudoku.Field[x, y] == 0)
                     {
+                        // If we don't know which numbers are valid/invalid, find those
                         if (sudoku.ExpandedSuccessors[x, y] == null)
                         {
-                            //int[] invalidNumbers = GetInvalidNumbers(sudoku.Field, x, y);
-                            //sudoku.ExpandedSuccessors[x, y] = new Number[sudoLength];
-                            //for (int i = 1; i <= sudoLength; i++)
-                            //{
-                            //}
-                            sudoku.ExpandedSuccessors[x, y] = GetInvalidNumbers(sudoku.Field, x, y);//invalidNumbers[i] == 0 ? Number.Valid : Number.Invalid;
+                            sudoku.ExpandedSuccessors[x, y] = GetInvalidNumbers(sudoku.Field, x, y);
                         }
 
+                        // For every number that we can fill in:
                         int amountOfInvalid = 0;
                         for (int i = 1; i <= sudoLength; i++)
                         {
-                            Number number = sudoku.ExpandedSuccessors[x, y][i];
-                            // Check if we have already expanded this successor
-                            if (number == Number.Valid)
+                            // Check if the number is valid (and not checked yet)
+                            if (sudoku.ExpandedSuccessors[x, y][i] == Status.Valid)
                             {
-                                //Sudoku successor = new Sudoku(sudoku.Field);
-                                //successor.Field[x, y] = validNumbers[i];    //change the successor with the chosen number
-                                //sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1] = true;
-                                sudoku.ExpandedSuccessors[x, y][i] = Number.Checked;
+                                // If so, create a successor and fill in that number in the sudoku field
+                                sudoku.ExpandedSuccessors[x, y][i] = Status.Checked;
                                 Sudoku successor = new Sudoku((int[,])sudoku.Field.Clone());
                                 successor.Field[x, y] = i;
 
                                 return successor;
                             }
-                            else if (number == Number.Invalid)
+                            else
                             {
+                                // If all numbers in this tile are either invalid or already checked,
+                                // then the current sudoku has no successor (because this tile can not be filled in)
                                 amountOfInvalid++;
                                 if (amountOfInvalid == sudoLength)
                                     return null;
                             }
                         }
-
-                        #region poep
-                        //// Get the numbers that can validly be put in the tile
-                        //int[] validNumbers = GetValidNumbers(sudoku.Field, x, y);
-                        //if (validNumbers.Length == 0)
-                        //    return null;
-
-                        ////Console.WriteLine("Valid numbers ({0},{1}): {2}", x, y, validNumbers.Length);
-
-                        //for (int i = 0; i < validNumbers.Length; i++)
-                        //    // Check if we have already expanded this successor
-                        //    if (!sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1])
-                        //    {
-                        //        sudoku.ExpandedSuccessors[x, y][validNumbers[i] - 1] = true;
-                        //        Sudoku successor = new Sudoku((int[,])sudoku.Field.Clone());
-                        //        successor.Field[x, y] = validNumbers[i];
-                        //        return successor;
-                        //    }
-                        #endregion
                     }
 
+            // This can only happen when all tiles are filled in,
+            // but that means the current sudoku is a goal
             return null;
         }
 
-        static Number[] GetInvalidNumbers(int[,] sudoku, int x, int y)
+        static Sudoku NextSuccessor2(Sudoku sudoku)
         {
-            /* int[] invalid = new int[sudoku.GetLength(0) + 1];
-            for (int x1 = 0; x1 < sudoku.GetLength(0); x1++)
-                invalid[sudoku[x1, y]]++;   //if a number's already used in a row or n * n square, we add + 1 to the invalid array, at the index of that number
+            int lowestx = 0, lowesty = 0, lowestAmountOfValidNumbers = sudoLength * 2;
 
-            for (int y1 = 0; y1 < sudoku.GetLength(0); y1++)
-                invalid[sudoku[x, y1]]++;
+            // For every tile in the sudoku:
+            for (int y = 0; y < sudoLength; y++)
+                for (int x = 0; x < sudoLength; x++)
+                    if (sudoku.Field[x, y] == 0)
+                    {
+                        // If we don't know which numbers are valid/invalid in this tile, find those
+                        if (sudoku.ExpandedSuccessors[x, y] == null)
+                            sudoku.ExpandedSuccessors[x, y] = GetInvalidNumbers(sudoku.Field, x, y);
 
-            // x2, y2 = index of square
-            int root = (int)Math.Sqrt(sudoku.GetLength(0)); */
+                        // Check how many valid numbers there are that we can fill in
+                        int amountOfValidNumbers = 0;
+                        for (int i = 1; i <= sudoLength; i++)
+                            if (sudoku.ExpandedSuccessors[x, y][i] == Status.Valid)
+                                amountOfValidNumbers++;
 
+                        // If all numbers in this tile are either invalid or already checked,
+                        // then the current sudoku has no successor (because this tile can not be filled in)
+                        if (amountOfValidNumbers == 0)
+                            return null;
+
+                        // If we can fill in less numbers than the last tile with the lowest amount of valid numbers,
+                        // then this tile has the lowest amount of valid numbers
+                        if (amountOfValidNumbers < lowestAmountOfValidNumbers)
+                        {
+                            lowestx = x;
+                            lowesty = y;
+                            lowestAmountOfValidNumbers = amountOfValidNumbers;
+                        }
+                    }
+            
+            // Get the first number that's valid in the tile with the lowest amount of valid numbers,
+            // and then create a successor with a field with that number filled in
+            for (int i = 1; i < sudoLength + 1; i++)
+                if (sudoku.ExpandedSuccessors[lowestx, lowesty][i] == Status.Valid)
+                {
+                    sudoku.ExpandedSuccessors[lowestx, lowesty][i] = Status.Checked;
+                    Sudoku successor = new Sudoku((int[,])sudoku.Field.Clone());
+                    successor.Field[lowestx, lowesty] = i;
+                    return successor;
+                }
+
+            // This can only happen when all tiles are filled in,
+            // but that means the current sudoku is a goal
+            return null;
+        }
+
+        static Status[] GetInvalidNumbers(int[,] sudoku, int x, int y)
+        {
             // Array invalid is an array with how often
             // a number is seen in a row, column, or square.
             // The index of an item in invalid is the number in the field.
-            Number[] invalid = new Number[sudoLength + 1];
+            Status[] invalid = new Status[sudoLength + 1];
 
             // Check for invalid numbers in the row
             for (int x1 = 0; x1 < sudoLength; x1++)
-                invalid[sudoku[x1, y]] = Number.Invalid;
+                invalid[sudoku[x1, y]] = Status.Invalid;
 
             // Check for invalid numbers in the column
             for (int y1 = 0; y1 < sudoLength; y1++)
-                invalid[sudoku[x, y1]] = Number.Invalid;
+                invalid[sudoku[x, y1]] = Status.Invalid;
 
             // Check for invalid numbers in the square
             // x2, y2 = index of top-left of square
@@ -164,76 +192,48 @@ namespace ci_prac_1
             
             for (int y3 = y2; y3 < y2 + root; y3++)
                 for (int x3 = x2; x3 < x2 + root; x3++)
-                    invalid[sudoku[x3, y3]] = Number.Invalid;
-
-            // For every item on a certain index (number) in the invalid array,
-            // check if that invalid[number] is not seen (is 0), and then add
-            // number to the valid list.
-            //List<int> valid = new List<int>();
-            //for (int i = 1; i < invalid.Length; i++)
-            //    if (invalid[i] == 0)
-            //        valid.Add(i);
-
-            //return valid.ToArray();
+                    invalid[sudoku[x3, y3]] = Status.Invalid;
+            
             return invalid;
         }
 
-        /*
-        procedure backtrack(L) returns t:
-            if empty(L) 
-                then return nil
-            else
-                t = first(L);
-                if goal(t) 
-                    then return t
-                else
-                    while there are unexplored successors of t and not found do
-                        t’ = next-successor(t);
-                        L = push(L,t’);
-                        backtrack(L)
-                    endwhile;
-                L = pop(L)
-        endprocedure
-        */
-        //static Stack stack = new Stack();
-
         static Sudoku BackTrack(Stack sudoStack)
         {
-            Console.WriteLine("Backtracking called");
+            //Console.WriteLine("Backtracking called");
             if (sudoStack.Count == 0)
             {
-                Console.WriteLine("Stack empty");
+                //Console.WriteLine("Stack empty");
                 return null;
             }
             else
             {
-                Console.WriteLine("Stack not empty");
+                //Console.WriteLine("Stack not empty");
                 Sudoku t = (Sudoku)sudoStack.Peek();
-                Console.WriteLine(t);
+                //Console.WriteLine(t);
                 if (t.IsGoal)
                 {
-                    Console.WriteLine("Sudoku is goal");
+                    //Console.WriteLine("Sudoku is goal");
                     return t;
                 }
                 else
                 {
-                    Console.WriteLine("Sudoku is not goal");
-                    while (true) //has-successors(t)
+                    //Console.WriteLine("Sudoku is not goal");
+                    while (true)
                     {
-                        Sudoku s = NextSuccessor(t);
+                        Sudoku s = NextSuccessor2(t);
                         if (s == null)
                         {
-                            Console.WriteLine("No successor found");
+                            //Console.WriteLine("No successor found");
                             break;
                         }
-                        Console.WriteLine("Successor found");
+                        //Console.WriteLine("Successor found");
                         sudoStack.Push(s);
                         Sudoku goal = BackTrack(sudoStack);
                         if (goal != null)
                             return goal;
                     }
                     //Console.WriteLine(t);
-                    Console.WriteLine("No goal under current sudoku");
+                    //Console.WriteLine("No goal under current sudoku");
                     sudoStack.Pop();
                     return null;
                 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ci_prac_1
 {
-    public enum Number { Valid, Invalid, Checked };
+    public enum Status { Valid, Invalid, Checked };
     public class Sudoku
     {
         // Whole sudoku = Field
@@ -16,14 +16,11 @@ namespace ci_prac_1
         public Sudoku(int[,] sudoku)
         {
             this.Field = sudoku;
-            this.ExpandedSuccessors = new Number[Program.sudoLength, Program.sudoLength][];
-            //for (int y = 0; y < sudoku.GetLength(0); y++)
-            //    for (int x = 0; x < sudoku.GetLength(0); x++)
-            //        this.ExpandedSuccessors[x, y] = new Number[sudoku.GetLength(0)];
+            this.ExpandedSuccessors = new Status[Program.sudoLength, Program.sudoLength][];
         }
         
         public int[,] Field;
-        public Number[,][] ExpandedSuccessors;
+        public Status[,][] ExpandedSuccessors;
 
         public bool IsGoal
         {
