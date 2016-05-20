@@ -1,41 +1,36 @@
 ﻿﻿using System;
 using System.IO;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace ci_prac_1
 {
     class Program
     {
         public static int sudoLength, sudoSquareLength;
+
+        // This bool can be changed to choose whether or not to use the imrpoved successor method
+        public static bool useImprovedSuccessorMethod = true;
+
         static void Main(string[] args)
         {
-            // Let the Console output to a file
-            //FileStream ostrm;
-            //StreamWriter writer;
-            //TextWriter oldOut = Console.Out;
-            //try
-            //{
-            //    File.Delete("./Redirect.txt");
-            //    ostrm = new FileStream("./Redirect.txt", FileMode.OpenOrCreate, FileAccess.Write);
-            //    writer = new StreamWriter(ostrm);
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("Cannot open Redirect.txt for writing");
-            //    Console.WriteLine(e.Message);
-            //    return;
-            //}
-            //Console.SetOut(writer);
-
             // Read a text file with a sudoku puzzle
-            StreamReader stream = File.OpenText(args[0]);
+            StreamReader stream;
+            if (args.Length > 0)
+            {
+                stream = File.OpenText(args[0]);
+                if (args.Length > 1 && args[1] == "0")
+                    useImprovedSuccessorMethod = false;
+            }
+            else
+                stream = File.OpenText("sudoku_9x9.txt");
+
+            // Read the first line of the file to get how large the sudoku is
             string line = stream.ReadLine();
             string[] lineChars = line.Split(' ');
             sudoLength = lineChars.Length;
             sudoSquareLength = (int)Math.Sqrt(sudoLength);
 
-            // Put the sudoku text in an array
+            // Put the sudoku in an array
             int[,] field = new int[sudoLength, sudoLength];
             for (int x = 0; x < sudoLength; x++)
                 field[x, 0] = int.Parse(lineChars[x]);
@@ -49,8 +44,9 @@ namespace ci_prac_1
                     field[x, y] = int.Parse(lineChars[x]);
                 y++;
             }
-            
+
             // Print the sudoku
+            Console.WriteLine("Initial sudoku");
             for (y = 0; y < sudoLength; y++)
             {
                 for (int x = 0; x < sudoLength; x++)
@@ -64,13 +60,13 @@ namespace ci_prac_1
             sudoStack.Push(new Sudoku(field));
             Sudoku goal = BackTrack(sudoStack);
             TimeSpan endTime = DateTime.Now.TimeOfDay;
-
-            Console.WriteLine(sudoStack.Count + " items on the stack");
+            
+            // Print the goal
             Console.WriteLine();
             Console.WriteLine(goal is Sudoku ? "Goal found!" : "No goal found");
             Console.WriteLine(goal);
-            Console.WriteLine(endTime - startTime);
-            //ostrm.Close();
+            Console.WriteLine("Time: " + (endTime - startTime).ToString());
+            Console.WriteLine("Press any key to close the program");
             Console.ReadKey();
         }
 
@@ -199,41 +195,44 @@ namespace ci_prac_1
 
         static Sudoku BackTrack(Stack sudoStack)
         {
-            //Console.WriteLine("Backtracking called");
             if (sudoStack.Count == 0)
             {
-                //Console.WriteLine("Stack empty");
+                // If we've went through every possible state, return null (no goal)
                 return null;
             }
             else
             {
-                //Console.WriteLine("Stack not empty");
                 Sudoku t = (Sudoku)sudoStack.Peek();
-                //Console.WriteLine(t);
                 if (t.IsGoal)
                 {
-                    //Console.WriteLine("Sudoku is goal");
+                    // If the current sudoku is a goal, return it
                     return t;
                 }
                 else
                 {
-                    //Console.WriteLine("Sudoku is not goal");
+                    // If it is not a goal, create its successors in this loop and check those
                     while (true)
                     {
-                        Sudoku s = NextSuccessor2(t);
+                        // Get the next successor
+                        Sudoku s;
+                        if (useImprovedSuccessorMethod)
+                            s = NextSuccessor2(t);
+                        else
+                            s = NextSuccessor(t);
+
+                        // If there is no successor found, get out of the loop
                         if (s == null)
-                        {
-                            //Console.WriteLine("No successor found");
                             break;
-                        }
-                        //Console.WriteLine("Successor found");
+
+                        // Put the successor on the stack and call BackTrack
                         sudoStack.Push(s);
                         Sudoku goal = BackTrack(sudoStack);
+
+                        // If a goal was found, return it, otherwise continue with the loop and find the next successor
                         if (goal != null)
                             return goal;
                     }
-                    //Console.WriteLine(t);
-                    //Console.WriteLine("No goal under current sudoku");
+                    // If none of the current sudoku's successors were a goal, remove it from the stack and return null
                     sudoStack.Pop();
                     return null;
                 }
